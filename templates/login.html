@@ -6,11 +6,9 @@
 <style>
   html, body {
     height: 100%;
-    overflow-y: hidden;
     background: #f0f2f5;
     margin: 0;
   }
-
   .info-box { font-size: 3rem; font-weight: 700; color: #1877f2; margin-bottom: 1rem; }
   .desc-text { font-size: 1.25rem; color: #050505; max-width: 400px; }
   .auth-card { background: #fff; border-radius: 8px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 360px; }
@@ -32,14 +30,16 @@
 </style>
 
 <div class="container-fluid">
-  <div class="row align-items-center" style="min-height: calc(100vh - 120px); overflow: hidden;">
-    <div class="col-md-6 d-none d-md-flex align-items-center justify-content-start ps-5">
+  <div class="row align-items-center flex-column flex-md-row" style="min-height: calc(100vh - 120px);">
+    <!-- Texto informativo acima no mobile e ao lado no desktop -->
+    <div class="col-12 col-md-6 d-flex align-items-center justify-content-center justify-content-md-start text-center text-md-start p-4">
       <div>
         <div class="info-box">Pedido de Materiais</div>
         <p class="desc-text">Use este site para fazer pedidos de materiais para seu posto.</p>
       </div>
     </div>
-    <div class="col-12 col-md-6 d-flex align-items-center justify-content-center">
+    <!-- Card de autenticação -->
+    <div class="col-12 col-md-6 d-flex align-items-center justify-content-center mt-4 mt-md-0">
       <div class="auth-card">
         <h2 class="text-center mb-4">Login</h2>
         <form method="post" class="d-grid gap-3">
@@ -66,13 +66,12 @@
     const icon = toggleElement.querySelector('i');
     if (input.type === 'password') {
       input.type = 'text';
-      icon.classList.remove('bi-eye');
-      icon.classList.add('bi-eye-slash');
+      icon.classList.replace('bi-eye', 'bi-eye-slash');
     } else {
       input.type = 'password';
-      icon.classList.remove('bi-eye-slash');
-      icon.classList.add('bi-eye');
+      icon.classList.replace('bi-eye-slash', 'bi-eye');
     }
   }
 </script>
+
 {% endblock %}

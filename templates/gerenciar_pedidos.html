@@ -34,9 +34,11 @@
               <i class="bi bi-eye"></i> Ver
             </a>
             {% if status == 'aberto' %}
-            <a class="btn btn-sm btn-outline-success rounded-pill ms-1" href="{{ url_for('fechar_pedido', pedido_id=id) }}">
-              <i class="bi bi-lock"></i> Fechar
-            </a>
+            <form id="close-form-{{ id }}" method="POST" action="{{ url_for('fechar_pedido', pedido_id=id) }}" style="display:inline;">
+              <button type="button" class="btn btn-sm btn-outline-success rounded-pill ms-1 close-order-btn" data-form-id="close-form-{{ id }}">
+                <i class="bi bi-lock"></i> Fechar
+              </button>
+            </form>
             {% endif %}
           </td>
         </tr>
@@ -50,4 +52,48 @@
   </div>
 </div>
 
+<!-- Modal de confirmação de fechamento -->
+<div class="modal fade" id="confirmCloseModal" tabindex="-1" aria-labelledby="confirmCloseModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white align-items-center">
+        <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+        <h5 class="modal-title mb-0" id="confirmCloseModalLabel">Confirmar Fechamento</h5>
+        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        Tem certeza que deseja fechar este pedido?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmCloseBtn">
+          <i class="bi bi-lock-fill me-1"></i> Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    let formToSubmit = null;
+    const confirmModalEl = document.getElementById('confirmCloseModal');
+    const confirmModal = new bootstrap.Modal(confirmModalEl);
+
+    document.querySelectorAll('.close-order-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        formToSubmit = document.getElementById(this.dataset.formId);
+        confirmModal.show();
+      });
+    });
+
+    document.getElementById('confirmCloseBtn').addEventListener('click', function() {
+      if (formToSubmit) {
+        formToSubmit.submit();
+      }
+    });
+  });
+</script>
 {% endblock %}
