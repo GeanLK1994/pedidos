@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>{% block title %}PEDIDO DE MATERIAIS{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --text: #212529;
+      --card: #ffffff;
+      --footer-bg: #e9ecef;
+      --footer-text: #212529;
+      --primary: #1877f2;
+    }
+
+    [data-theme="dark"] {
+      --bg: #1e1e1e;
+      --text: #f1f1f1;
+      --card: #2c2c2c;
+      --footer-bg: #2c2c2c;
+      --footer-text: #f1f1f1;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.95rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main {
+      flex: 1 0 auto;
+      padding: 1.5rem 1rem;
+    }
+
+    footer {
+      flex-shrink: 0;
+      background-color: var(--footer-bg);
+      color: var(--footer-text);
+      text-align: center;
+      padding: 0.75rem;
+      border-top: 1px solid #ccc;
+      position: relative;
+    }
+
+    .card, .auth-card {
+      background-color: var(--card) !important;
+      color: var(--text) !important;
+      border-radius: 10px;
+    }
+
+    .btn-primary, .bg-primary {
+      background-color: var(--primary) !important;
+      border-color: var(--primary) !important;
+    }
+
+    .text-primary {
+      color: var(--primary) !important;
+    }
+
+    .status-aberto {
+      color: green;
+      font-weight: bold;
+    }
+
+    .status-fechado {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+  <script>
+    function togglePassword(fieldId, toggleId) {
+      const input = document.getElementById(fieldId);
+      const toggle = document.getElementById(toggleId);
+      if (input.type === 'password') {
+        input.type = 'text'; toggle.innerText = '🐵';
+      } else {
+        input.type = 'password'; toggle.innerText = '🙈';
+      }
+    }
+
+    function toggleTheme() {
+      const theme = document.documentElement.getAttribute('data-theme');
+      const newTheme = theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    });
+  </script>
+</head>
+<body>
+  {% if session.usuario and request.endpoint not in ['login', 'cadastro'] %}
+  <div class="position-absolute d-flex gap-2 p-2" style="top: 1rem; right: 1rem; z-index: 1050;">
+    {% if request.endpoint not in ['dashboard', 'login', 'cadastro'] %}
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary rounded-pill d-flex align-items-center gap-2 shadow">
+      <i class="bi bi-house-door-fill"></i> Voltar ao Início
+    </a>
+    {% endif %}
+    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger rounded-pill d-flex align-items-center gap-2 shadow">
+      <i class="bi bi-box-arrow-right"></i> Logout
+    </a>
+  </div>
+  {% endif %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container mt-2">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block header %}{% endblock %}
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="position-relative">
+    <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
+      <small>Site criado por: Gean Lucas Souza Ferreira | Telefone: 31 9 7171-4620</small>
+      <button onclick="toggleTheme()" class="btn btn-sm btn-secondary">
+        <i class="bi bi-moon-fill me-1"></i> Modo Escuro
+      </button>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

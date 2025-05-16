@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Gerenciar Pedidos{% endblock %}
+{% block content %}
+
+<div class="card p-4 shadow-sm mb-4">
+  <h5 class="text-primary mb-3 d-flex align-items-center">
+    <i class="bi bi-list-check me-2"></i> Lista de Pedidos
+  </h5>
+
+  <div class="table-responsive">
+    <table class="table table-hover table-bordered align-middle text-center">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Usuário</th>
+          <th>Status</th>
+          <th>Data</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for id, usuario, status, data in pedidos %}
+        <tr>
+          <td>{{ id }}</td>
+          <td>{{ usuario }}</td>
+          <td>
+            <span class="badge {{ 'bg-success' if status == 'aberto' else 'bg-danger' }}">
+              {{ status }}
+            </span>
+          </td>
+          <td>{{ data }}</td>
+          <td>
+            <a class="btn btn-sm btn-outline-primary rounded-pill" href="{{ url_for('view_pedido', pedido_id=id) }}">
+              <i class="bi bi-eye"></i> Ver
+            </a>
+            {% if status == 'aberto' %}
+            <a class="btn btn-sm btn-outline-success rounded-pill ms-1" href="{{ url_for('fechar_pedido', pedido_id=id) }}">
+              <i class="bi bi-lock"></i> Fechar
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="text-center text-muted py-4">Nenhum pedido disponível.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

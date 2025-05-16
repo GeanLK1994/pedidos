@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}Cadastro de Produtos – PEDIDO DE MATERIAIS{% endblock %}
+
+{% block content %}
+<style>
+  .section-card {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-header {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-control-sm {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+  }
+
+  .btn-sm {
+    font-size: 0.9rem;
+    padding: 0.45rem 0.75rem;
+    transition: all 0.2s ease-in-out;
+  }
+  .btn-sm:active {
+    transform: scale(0.97);
+  }
+
+  .table-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: 0.5rem;
+    position: relative;
+  }
+
+  .table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 600px;
+  }
+
+  .table thead {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .table tbody {
+    display: block;
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  .table tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f1f1f1;
+    z-index: 2;
+    font-weight: 600;
+    text-align: center;
+    color: #212529;
+    padding: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .table tbody td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 0.5rem;
+  }
+</style>
+
+<div class="section-card">
+  <div class="section-header">
+    <i class="bi bi-box-seam-fill"></i> Cadastro de Produto
+  </div>
+  <form method="post" class="row gy-3 gx-3 align-items-end" onsubmit="return handleProdutoSubmit(event)">
+    <div class="col-md-10">
+      <label for="produto_nome" class="form-label">Nome do Produto</label>
+      <input type="text" id="produto_nome" name="produto_nome" class="form-control form-control-sm" required>
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary w-100 btn-sm">
+        <i class="bi bi-plus-lg me-1"></i> Adicionar
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="section-card">
+  <div class="section-header">
+    <i class="bi bi-search"></i> Buscar Produto Cadastrado
+  </div>
+  <input type="text" class="form-control form-control-sm mb-3" placeholder="Pesquisar por nome..." oninput="filtrarProdutos(this.value)">
+
+  <div class="table-container">
+    <table class="table table-sm table-hover table-striped">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="produtos-tbody">
+        {% for id, nome in produtos %}
+        <tr>
+          <td>{{ nome }}</td>
+          <td>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#confirmModal" onclick="prepareDelete({{ id }})">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="2" class="text-center text-muted py-4">Nenhum produto cadastrado.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="confirmModalLabel">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar remoção
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        Tem certeza que deseja remover este item da lista?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <form id="deleteForm" method="post">
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Remover
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function handleProdutoSubmit(event) {
+    const nomeInput = document.getElementById('produto_nome');
+    if (!nomeInput.value.trim()) {
+      event.preventDefault();
+      return false;
+    }
+    return true;
+  }
+
+  function prepareDelete(produtoId) {
+    const form = document.getElementById('deleteForm');
+    form.action = `/remover_produto/${produtoId}`;
+  }
+
+  function filtrarProdutos(termo) {
+    const rows = document.querySelectorAll('#produtos-tbody tr');
+    rows.forEach(row => {
+      const texto = row.children[0]?.textContent.toLowerCase() || "";
+      row.style.display = texto.includes(termo.toLowerCase()) ? '' : 'none';
+    });
+  }
+</script>
+{% endblock %}

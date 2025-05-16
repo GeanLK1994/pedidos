@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – PEDIDO DE MATERIAIS{% endblock %}
+
+{% block content %}
+<style>
+  .dashboard-header {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .card-dashboard {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s;
+    height: 100%;
+  }
+
+  .card-dashboard:hover {
+    transform: scale(1.04);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+  }
+
+  .card-icon {
+    font-size: 2.4rem;
+    color: #1877f2;
+  }
+
+  .card-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+
+  .card-text {
+    color: #555;
+    font-size: 0.95rem;
+    margin-top: 0.25rem;
+  }
+
+  .btn-rounded {
+    border-radius: 999px;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.95rem;
+  }
+</style>
+
+<h1 class="dashboard-header">Bem-vindo, {{ usuario }}!</h1>
+
+<div class="row g-4 justify-content-center">
+  <div class="col-md-4">
+    <div class="card card-dashboard p-4 text-center">
+      <div class="card-icon"><i class="bi bi-file-earmark-plus-fill"></i></div>
+      <div class="card-title">Novo Pedido</div>
+      <p class="card-text">Crie um novo pedido de materiais para seu posto.</p>
+      <a href="{{ url_for('novo_pedido') }}" class="btn btn-primary btn-rounded mt-3">
+        <i class="bi bi-arrow-right-circle me-1"></i> Acessar
+      </a>
+    </div>
+  </div>
+
+  {% if role in ['admin', 'master'] %}
+  <div class="col-md-4">
+    <div class="card card-dashboard p-4 text-center">
+      <div class="card-icon"><i class="bi bi-box-seam-fill"></i></div>
+      <div class="card-title">Produtos</div>
+      <p class="card-text">Gerencie os produtos disponíveis no sistema.</p>
+      <a href="{{ url_for('cadastro_produtos') }}" class="btn btn-primary btn-rounded mt-3">
+        <i class="bi bi-arrow-right-circle me-1"></i> Acessar
+      </a>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card card-dashboard p-4 text-center">
+      <div class="card-icon"><i class="bi bi-people-fill"></i></div>
+      <div class="card-title">Usuários</div>
+      <p class="card-text">Adicione, edite e visualize usuários do sistema.</p>
+      <a href="{{ url_for('manage_users') }}" class="btn btn-primary btn-rounded mt-3">
+        <i class="bi bi-arrow-right-circle me-1"></i> Acessar
+      </a>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card card-dashboard p-4 text-center">
+      <div class="card-icon"><i class="bi bi-clipboard-check-fill"></i></div>
+      <div class="card-title">Pedidos</div>
+      <p class="card-text">Visualize e gerencie todos os pedidos cadastrados.</p>
+      <a href="{{ url_for('gerenciar_pedidos') }}" class="btn btn-primary btn-rounded mt-3">
+        <i class="bi bi-arrow-right-circle me-1"></i> Acessar
+      </a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

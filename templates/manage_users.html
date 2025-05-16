@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm rounded-4 p-4 mb-4">
+        <h4 class="text-primary fw-bold mb-3">
+            <i class="bi bi-person-plus-fill"></i> Cadastro de Usuário
+        </h4>
+
+        <form method="POST" class="row g-3">
+            <div class="col-md-4">
+                <label for="usuario" class="form-label">Nome do Usuário</label>
+                <input type="text" class="form-control" id="usuario" name="usuario" required>
+            </div>
+            <div class="col-md-4">
+                <label for="senha" class="form-label">Senha</label>
+                <input type="password" class="form-control" id="senha" name="senha" required>
+            </div>
+            {% if role == 'master' %}
+            <div class="col-md-4">
+                <label for="role" class="form-label">Função</label>
+                <select class="form-select" id="role" name="role">
+                    <option value="user">Usuário</option>
+                    <option value="admin">Admin</option>
+                    <option value="master">Master</option>
+                </select>
+            </div>
+            {% endif %}
+            <div class="col-12 d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary px-4 rounded-pill">
+                    <i class="bi bi-plus-circle-fill"></i> Adicionar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card shadow-sm rounded-4 p-4">
+        <h5 class="text-primary fw-bold mb-3">
+            <i class="bi bi-search"></i> Buscar Usuário Cadastrado
+        </h5>
+
+        <input type="text" class="form-control mb-3" placeholder="Pesquisar por nome..." onkeyup="filtrarUsuarios(this.value)">
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuário</th>
+                        <th>Função</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaUsuarios">
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user[0] }}</td>
+                        <td>{{ user[1] }}</td>
+                        <td>
+                            {% if user[2] == 'master' %}
+                                <span class="badge bg-danger">Master</span>
+                            {% elif user[2] == 'admin' %}
+                                <span class="badge bg-info">Admin</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Usuário</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <!-- Botão Editar -->
+                            <a href="{{ url_for('edit_user', user_id=user[0]) }}" class="btn btn-outline-warning btn-sm rounded-circle me-2" title="Editar">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+                            <!-- Botão Excluir (apenas master, não remove Master Gean) -->
+                            {% if role == 'master' and user[1] != 'Master Gean' %}
+                            <form method="POST" action="{{ url_for('delete_user', user_id=user[0]) }}" style="display:inline;" onsubmit="return confirm('Deseja realmente excluir este usuário?');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle" title="Excluir">
+                                    <i class="bi bi-trash-fill"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function filtrarUsuarios(valor) {
+        const filtro = valor.toLowerCase();
+        const linhas = document.querySelectorAll("#tabelaUsuarios tr");
+        linhas.forEach(linha => {
+            const nome = linha.cells[1].innerText.toLowerCase();
+            linha.style.display = nome.includes(filtro) ? "" : "none";
+        });
+    }
+</script>
+{% endblock %}

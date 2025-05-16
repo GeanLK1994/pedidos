@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Login – Pedido de Materiais{% endblock %}
+{% block header %}{% endblock %}
+{% block content %}
+<style>
+  html, body {
+    height: 100%;
+    overflow-y: hidden;
+    background: #f0f2f5;
+    margin: 0;
+  }
+
+  .info-box { font-size: 3rem; font-weight: 700; color: #1877f2; margin-bottom: 1rem; }
+  .desc-text { font-size: 1.25rem; color: #050505; max-width: 400px; }
+  .auth-card { background: #fff; border-radius: 8px; padding: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 360px; }
+  .form-control { border: 1px solid #ccd0d5; border-radius: 6px; }
+  .form-control:focus { border-color: #1877f2; box-shadow: none; }
+  .btn-primary { background: #1877f2; border-color: #1877f2; border-radius: 6px; padding: .75rem; font-size: 1rem; font-weight: 600; }
+  .btn-primary:hover { background: #166fe5; }
+  .text-link { color: #1877f2; text-decoration: none; }
+  .text-link:hover { text-decoration: underline; }
+  .input-group-icon {
+    background: white;
+    border: 1px solid #ccd0d5;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: .625rem .75rem;
+    margin-left: .5rem;
+    font-size: 1.25rem;
+  }
+</style>
+
+<div class="container-fluid">
+  <div class="row align-items-center" style="min-height: calc(100vh - 120px); overflow: hidden;">
+    <div class="col-md-6 d-none d-md-flex align-items-center justify-content-start ps-5">
+      <div>
+        <div class="info-box">Pedido de Materiais</div>
+        <p class="desc-text">Use este site para fazer pedidos de materiais para seu posto.</p>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 d-flex align-items-center justify-content-center">
+      <div class="auth-card">
+        <h2 class="text-center mb-4">Login</h2>
+        <form method="post" class="d-grid gap-3">
+          <input id="usuario" name="usuario" type="text" class="form-control form-control-lg" placeholder="Usuário" required>
+          <div class="d-flex align-items-center">
+            <input id="senha" name="senha" type="password" class="form-control form-control-lg" placeholder="Senha" required>
+            <span class="input-group-icon" onclick="togglePassword('senha', this)">
+              <i class="bi bi-eye"></i>
+            </span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
+        </form>
+        <p class="text-center mt-3 mb-0">
+          Não tem conta? <a class="text-link" href="{{ url_for('cadastro') }}">Cadastre-se</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function togglePassword(inputId, toggleElement) {
+    const input = document.getElementById(inputId);
+    const icon = toggleElement.querySelector('i');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('bi-eye');
+      icon.classList.add('bi-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('bi-eye-slash');
+      icon.classList.add('bi-eye');
+    }
+  }
+</script>
+{% endblock %}

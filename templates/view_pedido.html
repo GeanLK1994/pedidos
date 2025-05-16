@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Pedido #{{ pedido_id }}{% endblock %}
+
+{% block content %}
+<style>
+  .section-card {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-header {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .btn-sm {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.6rem;
+  }
+
+  .status-label {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #fff;
+  }
+
+  .status-aberto {
+    background-color: #198754;
+  }
+
+  .status-fechado {
+    background-color: #dc3545;
+  }
+</style>
+
+<div class="section-card">
+  <div class="section-header">
+    <i class="bi bi-clipboard2-check-fill"></i> Pedido #{{ pedido_id }} 
+    <span class="ms-2">
+      {% if status == 'aberto' %}
+        <span class="status-label status-aberto">Aberto</span>
+      {% else %}
+        <span class="status-label status-fechado">Fechado</span>
+      {% endif %}
+    </span>
+  </div>
+
+  <div class="mb-4">
+    <h5 class="mb-3">Itens</h5>
+    <ul class="list-group">
+      {% for _, nome, quantity in itens %}
+      <li class="list-group-item">
+        <span>{{ nome }} <span class="text-muted">&mdash; Qtde: {{ quantity }}</span></span>
+        {% if status == 'aberto' %}
+        <a href="{{ url_for('remove_item', item_id=_) }}" class="btn btn-sm btn-outline-danger" title="Remover">
+          <i class="bi bi-x-circle"></i>
+        </a>
+        {% endif %}
+      </li>
+      {% endfor %}
+      {% if not itens %}
+      <li class="list-group-item text-muted text-center">Nenhum item adicionado.</li>
+      {% endif %}
+    </ul>
+  </div>
+
+  {% if status == 'aberto' %}
+  <form method="post" class="row g-3 align-items-end">
+    <div class="col-md-6">
+      <label for="produto_id" class="form-label">Adicionar Material</label>
+      <select name="produto_id" id="produto_id" class="form-select">
+        {% for prod_id, prod_nome in produtos %}
+        <option value="{{ prod_id }}">{{ prod_nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label for="quantity" class="form-label">Quantidade</label>
+      <input type="number" name="quantity" id="quantity" value="1" min="1" class="form-control">
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="bi bi-plus-circle"></i> Adicionar
+      </button>
+    </div>
+  </form>
+  {% endif %}
+
+  <div class="mt-4 d-flex gap-3">
+    <a href="{{ url_for('print_pedido', pedido_id=pedido_id) }}" target="_blank" class="btn btn-outline-primary d-flex align-items-center gap-2 px-3 py-2 rounded-pill shadow-sm">
+      <i class="bi bi-printer-fill"></i>
+      <span>Imprimir</span>
+    </a>
+
+    <a href="{{ url_for('gerenciar_pedidos') }}" class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3 py-2 rounded-pill shadow-sm">
+      <i class="bi bi-arrow-left-circle"></i>
+      <span>Voltar</span>
+    </a>
+  </div>
+</div>
+{% endblock %}
