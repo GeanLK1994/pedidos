@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/           # pastas de cache do Python
+*.py[cod]              # arquivos .pyc, .pyo, etc.
+
+# Virtual environments
+venv/                  # seu ambiente virtual criado com python -m venv venv
+env/                   # outra convenção comum
+
+# Distribution / packaging
+*.egg-info/            # metadados de pacotes
+dist/                  # pacotes gerados por setup.py sdist/bdist
+build/                 # pasta de build
+
+# SQLite database files (se estiver usando .db locais)
+*.sqlite3
+*.db
+
+# Logs
+*.log
+
+# IDEs e editores
+.vscode/               # configurações do VS Code
+.idea/                 # configurações do PyCharm/WebStorm
+*.sublime-project
+*.sublime-workspace
+
+# arquivos de sistema
+.DS_Store              # macOS
+Thumbs.db              # Windows
+
+# variáveis de ambiente
+.env                   # se você usa um arquivo .env para SECRET_KEY, DATABASE_URL, etc.
