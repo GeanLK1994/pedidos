@@ -18,7 +18,8 @@ def criar_banco():
             senha    TEXT    NOT NULL,
             role     TEXT    NOT NULL DEFAULT 'user'
         );
-    """)
+    """
+    )
 
     # tabela de produtos
     cursor.execute("""
@@ -27,7 +28,8 @@ def criar_banco():
             nome       TEXT    UNIQUE NOT NULL,
             categoria  TEXT
         );
-    """)
+    """
+    )
 
     # tabela de pedidos
     cursor.execute("""
@@ -37,7 +39,8 @@ def criar_banco():
             status     TEXT    NOT NULL DEFAULT 'aberto',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
-    """)
+    """
+    )
 
     # tabela de itens de pedido
     cursor.execute("""
@@ -49,7 +52,8 @@ def criar_banco():
             FOREIGN KEY(pedido_id) REFERENCES pedidos(id),
             FOREIGN KEY(produto_id) REFERENCES produtos(id)
         );
-    """)
+    """
+    )
 
     conexao.commit()
 
@@ -69,6 +73,7 @@ def criar_banco():
 def adicionar_usuario(usuario, senha, role='user'):
     """
     Insere um novo usuário com senha em texto e função.
+    Retorna True se inserido com sucesso, False se já existe.
     """
     conexao = sqlite3.connect(DB_PATH)
     cursor = conexao.cursor()
@@ -78,8 +83,9 @@ def adicionar_usuario(usuario, senha, role='user'):
             (usuario, senha, role)
         )
         conexao.commit()
+        return True
     except sqlite3.IntegrityError:
-        pass
+        return False
     finally:
         conexao.close()
 
@@ -115,6 +121,7 @@ def excluir_usuario(user_id):
 def adicionar_produto(nome, categoria=''):
     """
     Insere um novo produto com categoria.
+    Retorna True se inserido, False se já existe.
     """
     conexao = sqlite3.connect(DB_PATH)
     cursor = conexao.cursor()
@@ -124,8 +131,9 @@ def adicionar_produto(nome, categoria=''):
             (nome, categoria)
         )
         conexao.commit()
+        return True
     except sqlite3.IntegrityError:
-        pass
+        return False
     finally:
         conexao.close()
 
@@ -231,7 +239,8 @@ def listar_pedidos():
         FROM pedidos
         ORDER BY created_at DESC
         LIMIT 50
-    """)
+    """
+    )
     pedidos = cursor.fetchall()
     conexao.close()
     return pedidos

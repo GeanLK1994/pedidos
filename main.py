@@ -65,7 +65,11 @@ def cadastro():
             flash('Preencha usuário e senha para se cadastrar.', 'warning')
             return redirect(url_for('cadastro'))
 
-        adicionar_usuario(usuario, senha, role='user')
+        # tenta inserir e verifica sucesso
+        if not adicionar_usuario(usuario, senha, role='user'):
+            flash('Este usuário já existe. Escolha outro nome.', 'danger')
+            return redirect(url_for('cadastro'))
+
         flash('Cadastro realizado com sucesso! Faça login.', 'success')
         return redirect(url_for('login'))
     return render_template('cadastro.html')
@@ -166,10 +170,9 @@ def cadastro_produtos():
         if not nome:
             flash('Informe o nome do produto.', 'warning')
         else:
-            try:
-                adicionar_produto(nome)
+            if adicionar_produto(nome):
                 flash('Produto cadastrado com sucesso.', 'success')
-            except:
+            else:
                 flash('Produto já existe.', 'danger')
         return redirect(url_for('cadastro_produtos'))
 
