@@ -1,8 +1,25 @@
 {% extends "base.html" %}
 {% block title %}Cadastro de Produtos – PEDIDO DE MATERIAIS{% endblock %}
 
+{% block header %}{% endblock %}
+
 {% block content %}
 <style>
+  /* 1) Garantir que o scroll seja apenas dentro de main */
+  html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+  main.container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 120px); /* desconta header + footer */
+    overflow: auto;
+    padding: 1rem;
+  }
+
+  /* 2) Mesmos estilos do novo pedido */
   .section-card {
     background: var(--card);
     border-radius: 12px;
@@ -19,37 +36,34 @@
     gap: 0.5rem;
     margin-bottom: 1rem;
   }
-  .form-control-sm {
-    font-size: 0.9rem;
-    padding: 0.5rem;
-  }
-  .btn-sm {
-    font-size: 0.9rem;
-    padding: 0.45rem 0.75rem;
-    transition: all 0.2s ease-in-out;
-  }
-  .btn-sm:active {
-    transform: scale(0.97);
-  }
+
+  /* inputs e botões compactos para mobile */
+  .form-control-sm { font-size: 0.9rem; padding: 0.5rem; }
+  .btn-sm { font-size: 0.9rem; padding: 0.45rem 0.75rem; }
+
+  /* tabela responsiva sem scroll vertical extra */
+  .table-responsive { overflow-x: auto; }
+  table { margin-bottom: 0; }
+
+  /* espaçamento do ultimo card para não colidir com footer */
+  .section-card:last-of-type { margin-bottom: 3rem; }
 </style>
 
-<div class="container-fluid">
-  <!-- Card de cadastro -->
+<main class="container">
+  <!-- card de cadastro -->
   <div class="section-card">
     <div class="section-header">
       <i class="bi bi-box-seam-fill"></i> Cadastro de Produto
     </div>
-    <form method="post" class="row g-3 align-items-end" onsubmit="return handleProdutoSubmit(event)">
+    <form method="post" class="row g-3 align-items-end" onsubmit="return !!this.produto_nome.value.trim()">
       <div class="col-12 col-md-10">
         <label for="produto_nome" class="form-label">Nome do Produto</label>
-        <input
-          type="text"
-          id="produto_nome"
-          name="produto_nome"
-          class="form-control form-control-sm"
-          placeholder="Informe o nome..."
-          required
-        >
+        <input type="text"
+               id="produto_nome"
+               name="produto_nome"
+               class="form-control form-control-sm"
+               placeholder="Informe o nome..."
+               required>
       </div>
       <div class="col-12 col-md-2 d-grid">
         <button type="submit" class="btn btn-primary btn-sm">
@@ -59,68 +73,72 @@
     </form>
   </div>
 
-  <!-- Card de listagem -->
+  <!-- card de listagem -->
   <div class="section-card">
     <div class="section-header">
       <i class="bi bi-search"></i> Buscar Produto Cadastrado
     </div>
-    <input
-      type="text"
-      class="form-control form-control-sm mb-3"
-      placeholder="Pesquisar por nome..."
-      oninput="filtrarProdutos(this.value)"
-    >
+    <input type="text"
+           class="form-control form-control-sm mb-3"
+           placeholder="Pesquisar por nome..."
+           oninput="document.querySelectorAll('#produtos tbody tr').forEach(r => {
+             const txt = r.cells[0].textContent.toLowerCase();
+             r.style.display = txt.includes(this.value.toLowerCase()) ? '' : 'none';
+           })">
 
     <div class="table-responsive">
-      <table class="table table-sm table-hover table-striped mb-0">
+      <table id="produtos" class="table table-sm table-hover table-striped">
         <thead class="table-light">
           <tr>
             <th>Produto</th>
             <th class="text-center">Ações</th>
           </tr>
         </thead>
-        <tbody id="produtos-tbody">
+        <tbody>
           {% for id, nome in produtos %}
           <tr>
             <td>{{ nome }}</td>
             <td class="text-center">
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-danger"
-                data-bs-toggle="modal"
-                data-bs-target="#confirmModal"
-                onclick="prepareDelete({{ id }})"
-              >
+              <button type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      data-bs-toggle="modal"
+                      data-bs-target="#confirmModal"
+                      onclick="document.getElementById('deleteForm').action='/remover_produto/{{ id }}'">
                 <i class="bi bi-trash"></i>
               </button>
             </td>
           </tr>
           {% else %}
           <tr>
-            <td colspan="2" class="text-center text-muted py-4">Nenhum produto cadastrado.</td>
+            <td colspan="2" class="text-center text-muted py-4">
+              Nenhum produto cadastrado.
+            </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
-</div>
+</main>
 
-<!-- Modal de confirmação -->
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+<!-- modal de confirmação -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="confirmModalLabel">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar remoção
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          Confirmar remoção
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        <button type="button" class="btn-close btn-close-white"
+                data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
       <div class="modal-body">
         Tem certeza que deseja remover este produto?
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-outline-secondary"
+                data-bs-dismiss="modal">Cancelar</button>
         <form id="deleteForm" method="post">
           <button type="submit" class="btn btn-danger">
             <i class="bi bi-trash-fill me-1"></i> Remover
@@ -130,27 +148,4 @@
     </div>
   </div>
 </div>
-
-<script>
-  function handleProdutoSubmit(event) {
-    const nomeInput = document.getElementById('produto_nome');
-    if (!nomeInput.value.trim()) {
-      event.preventDefault();
-      return false;
-    }
-    return true;
-  }
-
-  function prepareDelete(produtoId) {
-    const form = document.getElementById('deleteForm');
-    form.action = '/remover_produto/' + produtoId;
-  }
-
-  function filtrarProdutos(termo) {
-    document.querySelectorAll('#produtos-tbody tr').forEach(row => {
-      const texto = row.cells[0]?.textContent.toLowerCase() || '';
-      row.style.display = texto.includes(termo.toLowerCase()) ? '' : 'none';
-    });
-  }
-</script>
 {% endblock %}
