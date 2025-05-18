@@ -1,20 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Novo Pedido – Pedido de Materiais{% endblock %}
-
 {% block content %}
 <style>
-  /* === Layout geral === */
-  html, body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden; /* evita scroll externo, footer sempre visível */
-  }
-  main.container {
-    height: calc(100vh - 120px); /* header + footer = 120px */
-    overflow-y: auto;             /* scroll interno no main */
-    padding: 1rem;
-  }
-
   .section-card {
     background: var(--card);
     border-radius: 12px;
@@ -22,144 +9,135 @@
     padding: 1.5rem;
     margin-bottom: 1.5rem;
   }
-
   .section-header {
     font-size: 1.5rem;
     font-weight: 600;
     color: var(--primary);
     display: flex;
     align-items: center;
-    gap: .5rem;
+    gap: 0.5rem;
     margin-bottom: 1rem;
   }
-
   .form-control-sm {
-    font-size: .9rem;
-    padding: .5rem;
+    font-size: 0.9rem;
+    padding: 0.5rem;
   }
   .btn-sm {
-    font-size: .9rem;
-    padding: .45rem .75rem;
-    transition: transform .2s ease-in-out;
+    font-size: 0.9rem;
+    padding: 0.45rem 0.75rem;
+    transition: all 0.2s ease-in-out;
   }
-  .btn-sm:active {
-    transform: scale(.97);
+  .btn-sm:active { transform: scale(0.97); }
+  .list-group-item { cursor: pointer; transition: background 0.2s; }
+  .list-group-item:hover { background-color: #e7f1ff; }
+  .input-group .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
   }
-
   .input-group-text {
-    background: white;
+    background-color: white;
     border-left: 0;
+    border-radius: 0 6px 6px 0;
     cursor: pointer;
   }
+  .table thead th {
+    background: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .table td, .table th { vertical-align: middle !important; }
+  .btn-outline-danger i { pointer-events: none; }
+  .btn-outline-danger:hover { background-color: #dc3545; color: white; }
 
-  /* === Scroll interno na lista de produtos === */
+  /* limita o tamanho da lista de produtos */
   #produtos-list {
     max-height: 180px;
     overflow-y: auto;
   }
 
-  /* === Itens adicionados: quando >5 linhas vira scroll === */
-  .table-responsive {
-    /* altura aproximada de 5 linhas + header */
-    max-height: calc(5 * 2.5rem + 2.5rem);
+  /* quando tiver mais de 5 itens, habilita scroll */
+  #itens-wrapper {
+    max-height: 300px;
     overflow-y: auto;
-  }
-  .table-responsive thead th {
-    position: sticky;
-    top: 0;
-    background: #f8f9fa;
-    z-index: 1;
-  }
-
-  /* === Modal personalizado === */
-  .modal-header {
-    background: #dc3545;
-    color: #fff;
-  }
-  .modal-title {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
   }
 </style>
 
-<main class="container">
+<div id="alert-container"></div>
 
-  <div class="section-card">
-    <div class="section-header">
-      <i class="bi bi-plus-circle-fill"></i> Adicionar Material
-    </div>
-    <form method="post" class="row gy-3 gx-3 align-items-end" onsubmit="return !!produtoId.value">
-      <div class="col-lg-6 col-md-8">
-        <label for="produto-search" class="form-label">Produto</label>
-        <div class="input-group">
-          <input
-            type="text"
-            id="produto-search"
-            class="form-control form-control-sm"
-            placeholder="Pesquisar produto..."
-            oninput="filterProdutos()"
-            autocomplete="off"
-          >
-          <span class="input-group-text"><i class="bi bi-search"></i></span>
-        </div>
-      </div>
-      <div class="col-lg-2 col-md-4">
-        <label for="quantity" class="form-label">Quantidade</label>
-        <div class="input-group">
-          <span class="input-group-text"><i class="bi bi-123"></i></span>
-          <input
-            type="number"
-            id="quantity"
-            name="quantity"
-            class="form-control form-control-sm"
-            min="1"
-            value="1"
-            required
-          >
-        </div>
-      </div>
-      <div class="col-lg-2 col-md-4 d-grid">
-        <button
-          class="btn btn-primary w-100 btn-sm"
-          type="submit"
-          id="btn-adicionar"
-          disabled
-        >
-          <i class="bi bi-plus-lg me-1"></i> Adicionar
-        </button>
-      </div>
-      <input type="hidden" name="produto_id" id="produtoId">
-    </form>
-
-    <div id="produtos-list" class="list-group mt-3">
-      {% for prod_id, prod_nome in produtos %}
-        <button
-          type="button"
-          class="list-group-item list-group-item-action"
-          data-id="{{ prod_id }}"
-          onclick="selectProduto(this)"
-        >{{ prod_nome }}</button>
-      {% endfor %}
-    </div>
+<div class="section-card">
+  <div class="section-header">
+    <i class="bi bi-plus-circle-fill"></i> Adicionar Material
   </div>
-
-  <div class="section-card">
-    <div class="section-header">
-      <i class="bi bi-basket-fill"></i> Itens Adicionados
+  <form method="post" class="row gy-3 gx-3 align-items-end">
+    <div class="col-lg-6 col-md-8">
+      <label for="produto-search" class="form-label">Produto</label>
+      <div class="input-group">
+        <input
+          type="text"
+          id="produto-search"
+          class="form-control form-control-sm"
+          placeholder="Pesquisar produto..."
+          autocomplete="off"
+        >
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+      </div>
     </div>
-    <div class="table-responsive">
-      <table class="table table-sm table-hover table-striped mb-0">
-        <thead>
-          <tr>
-            <th class="text-center">Produto</th>
-            <th class="text-center">Qtd.</th>
-            <th class="text-center">Ações</th>
-          </tr>
-        </thead>
-        <tbody id="itens-tbody">
-          {% if itens %}
-            {% for item_id, nome, quantity in itens %}
+    <div class="col-lg-2 col-md-4">
+      <label for="quantity" class="form-label">Quantidade</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-123"></i></span>
+        <input
+          type="number"
+          id="quantity"
+          name="quantity"
+          class="form-control form-control-sm"
+          min="1"
+          value="1"
+          required
+        >
+      </div>
+    </div>
+    <div class="col-lg-2 col-md-4">
+      <button
+        class="btn btn-primary w-100 btn-sm"
+        type="submit"
+        id="btn-adicionar"
+        disabled
+      >
+        <i class="bi bi-plus-lg me-1"></i> Adicionar
+      </button>
+    </div>
+    <input type="hidden" name="produto_id" id="produtoId">
+  </form>
+
+  <div id="produtos-list" class="list-group mt-3">
+    {% for prod_id, prod_nome in produtos %}
+      <button
+        type="button"
+        class="list-group-item list-group-item-action"
+        data-id="{{ prod_id }}"
+      >{{ prod_nome }}</button>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-header">
+    <i class="bi bi-basket-fill"></i> Itens Adicionados
+  </div>
+  <div id="itens-wrapper">
+    <table class="table table-sm table-hover table-striped mb-0">
+      <thead>
+        <tr>
+          <th class="text-center">Produto</th>
+          <th class="text-center">Qtd.</th>
+          <th class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody id="itens-tbody">
+        {% if itens %}
+          {% for item_id, nome, quantity in itens %}
             <tr data-item-id="{{ item_id }}">
               <td class="text-center">{{ nome }}</td>
               <td class="text-center">{{ quantity }}</td>
@@ -167,27 +145,25 @@
                 <button
                   type="button"
                   class="btn btn-sm btn-outline-danger"
-                  onclick="confirmRemove({{ item_id }}, this)"
+                  onclick="confirmRemove({{ item_id }}, this);"
                   title="Remover"
                 >
                   <i class="bi bi-trash"></i>
                 </button>
               </td>
             </tr>
-            {% endfor %}
-          {% else %}
-            <tr>
-              <td colspan="3" class="text-center text-muted py-4">
-                Nenhum item adicionado.
-              </td>
-            </tr>
-          {% endif %}
-        </tbody>
-      </table>
-    </div>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="3" class="text-center text-muted py-4">
+              Nenhum item adicionado.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
   </div>
-
-</main>
+</div>
 
 <!-- Modal de Confirmação -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
@@ -211,41 +187,54 @@
     </div>
   </div>
 </div>
-
 {% block scripts %}
 <script>
+  // capturar elementos do DOM
+  const produtoSearch    = document.getElementById('produto-search');
+  const produtosList     = document.getElementById('produtos-list');
+  const produtoId        = document.getElementById('produtoId');
+  const btnAdicionar     = document.getElementById('btn-adicionar');
+  const confirmModalEl   = document.getElementById('confirmModal');
+  const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
   let selectedButton = null;
   let deleteTarget = { id: null, btn: null };
 
-  function filterProdutos() {
+  // filtra lista de produtos
+  produtoSearch.addEventListener('input', () => {
     const term = produtoSearch.value.toLowerCase();
-    document.querySelectorAll('#produtos-list button').forEach(btn => {
+    produtosList.querySelectorAll('button').forEach(btn => {
       btn.style.display = btn.textContent.toLowerCase().includes(term) ? '' : 'none';
     });
-  }
+  });
 
-  function selectProduto(btn) {
-    if (selectedButton) selectedButton.classList.remove('active');
-    btn.classList.add('active');
-    selectedButton = btn;
-    produtoId.value = btn.dataset.id;
-    btnAdicionar.disabled = false;
-  }
+  // configura cada botão de produto
+  produtosList.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (selectedButton) selectedButton.classList.remove('active');
+      btn.classList.add('active');
+      selectedButton = btn;
+      produtoId.value = btn.dataset.id;
+      btnAdicionar.disabled = false;
+    });
+  });
 
+  // exibe modal de confirmação
   function confirmRemove(itemId, btn) {
     deleteTarget = { id: itemId, btn };
-    new bootstrap.Modal(confirmModal).show();
+    new bootstrap.Modal(confirmModalEl).show();
   }
 
+  // ação do botão "Remover" no modal
   confirmDeleteBtn.addEventListener('click', () => {
     if (!deleteTarget.id) return;
-    fetch(`{{ url_for('remove_item', item_id=0) }}`.replace('0', deleteTarget.id), { method: 'POST' })
-      .then(() => {
-        deleteTarget.btn.closest('tr').remove();
-        bootstrap.Modal.getInstance(confirmModal).hide();
-      });
+    fetch(`{{ url_for('remove_item', item_id=0) }}`.replace('0', deleteTarget.id), {
+      method: 'POST'
+    }).then(() => {
+      deleteTarget.btn.closest('tr').remove();
+      bootstrap.Modal.getInstance(confirmModalEl).hide();
+    });
   });
 </script>
 {% endblock %}
-
 {% endblock %}

@@ -10,7 +10,6 @@
     padding: 1.5rem;
     margin-bottom: 1.5rem;
   }
-
   .section-header {
     font-size: 1.5rem;
     font-weight: 600;
@@ -20,20 +19,6 @@
     gap: 0.5rem;
     margin-bottom: 1rem;
   }
-
-  .list-group-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1rem;
-    padding: 0.75rem 1rem;
-  }
-
-  .btn-sm {
-    font-size: 0.85rem;
-    padding: 0.35rem 0.6rem;
-  }
-
   .status-label {
     display: inline-block;
     padding: 0.25rem 0.5rem;
@@ -42,14 +27,25 @@
     font-size: 0.9rem;
     color: #fff;
   }
+  .status-aberto { background-color: #198754 }
+  .status-fechado { background-color: #dc3545 }
 
-  .status-aberto {
-    background-color: #198754;
+  /* nova seção de adição */
+  #produto-search { margin-bottom: .75rem; }
+  #produtos-table-wrapper {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    margin-bottom: 1rem;
   }
-
-  .status-fechado {
-    background-color: #dc3545;
+  #produtos-table th {
+    position: sticky;
+    top: 0;
+    background: var(--card);
+    z-index: 1;
   }
+  .input-qty { width: 4rem; }
 </style>
 
 <div class="section-card">
@@ -65,70 +61,87 @@
   </div>
 
   <div class="mb-4">
-    <h5 class="mb-3">Itens</h5>
+    <h5 class="mb-3">Itens Adicionados</h5>
     <ul class="list-group">
       {% if itens %}
         {% for item_id, nome, quantity in itens %}
-        <li class="list-group-item">
-          <span>{{ nome }} <span class="text-muted">— Qtde: {{ quantity }}</span></span>
-          {% if status == 'aberto' %}
-          <button type="button"
-                  class="btn btn-sm btn-outline-danger"
-                  data-bs-toggle="modal"
-                  data-bs-target="#confirmRemoveModal"
-                  data-item-id="{{ item_id }}"
-                  title="Remover">
-            <i class="bi bi-x-circle"></i>
-          </button>
-          {% endif %}
-        </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ nome }}
+            <span class="badge bg-secondary">Qtd: {{ quantity }}</span>
+          </li>
         {% endfor %}
       {% else %}
-        <li class="list-group-item text-muted text-center">Nenhum item adicionado.</li>
+        <li class="list-group-item text-center text-muted">Nenhum item adicionado.</li>
       {% endif %}
     </ul>
   </div>
 
   {% if status == 'aberto' %}
-  <form method="POST" class="row g-3 align-items-end">
-    <div class="col-md-6">
-      <label for="produto_id" class="form-label">Adicionar Material</label>
-      <select name="produto_id" id="produto_id" class="form-select" required>
-        <option value="" disabled selected>Selecione...</option>
-        {% for prod_id, prod_nome in produtos %}
-        <option value="{{ prod_id }}">{{ prod_nome }}</option>
-        {% endfor %}
-      </select>
+    <div class="section-card mb-4">
+      <div class="section-header">
+        <i class="bi bi-plus-circle-fill"></i> Adicionar Material
+      </div>
+
+      <!-- busca -->
+      <input
+        type="text"
+        id="produto-search"
+        class="form-control form-control-sm"
+        placeholder="Pesquisar produto..."
+      >
+
+      <!-- tabela rolável a partir de 5 produtos -->
+      <div
+        id="produtos-table-wrapper"
+        style="max-height: {% if produtos|length > 5 %}200px{% else %}auto{% endif %};"
+      >
+        <table id="produtos-table" class="table table-sm mb-0">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th class="text-center">Qtd.</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for prod_id, prod_nome in produtos %}
+              <tr data-id="{{ prod_id }}">
+                <td>{{ prod_nome }}</td>
+                <td class="text-center">
+                  <input
+                    type="number"
+                    class="form-control form-control-sm input-qty"
+                    value="1"
+                    min="1"
+                  >
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-outline-primary btn-add">
+                    <i class="bi bi-plus-lg"></i>
+                  </button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div class="col-md-2">
-      <label for="quantity" class="form-label">Quantidade</label>
-      <input type="number" name="quantity" id="quantity" value="1" min="1" class="form-control" required>
-    </div>
-    <div class="col-md-2">
-      <button type="submit" class="btn btn-primary w-100">
-        <i class="bi bi-plus-circle"></i> Adicionar
-      </button>
-    </div>
-  </form>
   {% endif %}
 
-  <div class="mt-4 d-flex gap-3">
+  <div class="d-flex gap-3">
     <a href="{{ url_for('print_pedido', pedido_id=pedido_id) }}"
        target="_blank"
-       class="btn btn-outline-primary d-flex align-items-center gap-2 px-3 py-2 rounded-pill shadow-sm">
-      <i class="bi bi-printer-fill"></i>
-      <span>Imprimir</span>
+       class="btn btn-outline-primary d-flex align-items-center gap-2">
+      <i class="bi bi-printer-fill"></i> Imprimir
     </a>
-
     <a href="{{ url_for('gerenciar_pedidos') }}"
-       class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3 py-2 rounded-pill shadow-sm">
-      <i class="bi bi-arrow-left-circle"></i>
-      <span>Voltar</span>
+       class="btn btn-outline-secondary d-flex align-items-center gap-2">
+      <i class="bi bi-arrow-left-circle"></i> Voltar
     </a>
   </div>
 </div>
 
-<!-- Modal de confirmação de remoção -->
+<!-- Modal de confirmação (sem alterações) -->
 <div class="modal fade" id="confirmRemoveModal" tabindex="-1" aria-labelledby="confirmRemoveLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content border-danger">
@@ -136,33 +149,68 @@
         <h5 class="modal-title" id="confirmRemoveLabel">
           <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar remoção
         </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        Tem certeza que deseja remover este item da lista?
+        Tem certeza que deseja remover este item?
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <form id="removeForm" method="POST" action="">
           <button type="submit" class="btn btn-danger">
-            <i class="bi bi-trash-fill me-1"></i>Remover
+            <i class="bi bi-trash-fill me-1"></i> Remover
           </button>
         </form>
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
 
 {% block scripts %}
 <script>
+  // filtra linhas da tabela
+  document.getElementById('produto-search').addEventListener('input', function() {
+    const term = this.value.toLowerCase();
+    document.querySelectorAll('#produtos-table tbody tr').forEach(tr => {
+      tr.style.display = tr.cells[0].textContent.toLowerCase().includes(term) ? '' : 'none';
+    });
+  });
+
+  // ação de adicionar com quantidade
+  document.querySelectorAll('.btn-add').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const tr    = e.currentTarget.closest('tr');
+      const prodId= tr.dataset.id;
+      const qty   = tr.querySelector('.input-qty').value || 1;
+
+      // monta form
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.style.display = 'none';
+
+      const inpId  = document.createElement('input');
+      inpId.name   = 'produto_id';
+      inpId.value  = prodId;
+      form.appendChild(inpId);
+
+      const inpQty = document.createElement('input');
+      inpQty.name  = 'quantity';
+      inpQty.value = qty;
+      form.appendChild(inpQty);
+
+      document.body.appendChild(form);
+      form.submit();
+    });
+  });
+
+  // configura modal de remoção
   const confirmModal = document.getElementById('confirmRemoveModal');
-  confirmModal.addEventListener('show.bs.modal', function (event) {
-    const button = event.relatedTarget;
-    const itemId = button.getAttribute('data-item-id');
-    const baseUrl = "{{ url_for('remove_item', item_id=0) }}".slice(0, -1);
-    const form = document.getElementById('removeForm');
-    form.action = baseUrl + itemId;
+  confirmModal.addEventListener('show.bs.modal', e => {
+    const btn    = e.relatedTarget;
+    const itemId = btn.getAttribute('data-item-id');
+    const base   = "{{ url_for('remove_item', item_id=0) }}";
+    document.getElementById('removeForm').action = base.replace('0', itemId);
   });
 </script>
-{% endblock %}
 {% endblock %}
