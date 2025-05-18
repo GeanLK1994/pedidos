@@ -1,20 +1,13 @@
 {% extends "base.html" %}
-
-{% block title %}Cadastro de Produtos – Pedido de Materiais{% endblock %}
+{% block title %}Cadastro de Produto – Pedido de Materiais{% endblock %}
 {% block header %}{% endblock %}
 
 {% block content %}
 <style>
-  /* 1) Layout geral: só main rola */
-  html, body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-  }
+  /* manter footer sempre visível */
+  html, body { height:100%; margin:0; overflow:hidden; }
   main.container {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 120px); /* header + footer */
+    height: calc(100vh - 120px);
     overflow-y: auto;
     padding: 1rem;
   }
@@ -32,50 +25,30 @@
     color: var(--primary);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: .5rem;
     margin-bottom: 1rem;
   }
 
-  /* 2) Formulário compacto */
-  .form-control-sm { font-size: 0.9rem; padding: 0.5rem; }
-  .btn-sm { font-size: 0.9rem; padding: 0.45rem 0.75rem; }
-
-  /* 3) Tabela responsiva */
-  .table-responsive { overflow-x: auto; }
-  table { margin-bottom: 0; }
+  /* scrollbar interno para tbody (mobile quando >5 rows) */
   @media (max-width: 576px) {
-    /* transformar tabela em blocos */
-    table, thead, tbody, th, td, tr { display: block; }
-    thead tr { display: none; }
-    tbody tr {
-      margin-bottom: 1rem;
-      padding: .5rem;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    .table-responsive tbody {
+      display: block;
+      max-height: calc(5 * 2.5rem + 1rem); /* 5 linhas x altura + padding */
+      overflow-y: auto;
     }
-    tbody td {
-      display: flex;
-      justify-content: space-between;
-      padding: .25rem 0;
-      font-size: .95rem;
+    .table-responsive thead, .table-responsive tbody tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
     }
-    tbody td::before {
-      content: attr(data-label);
-      font-weight: 500;
-      color: #555;
-      margin-right: .5rem;
+    .table-responsive thead { width: calc(100% - 1em); /* compensar scrollbar */ }
+    .table-responsive tbody tr:nth-child(n+6) {
+      /* continua exibindo 6ª+ linhas dentro do scroll */
     }
-  }
-
-  /* garantir espaço final antes do footer */
-  .section-card:last-of-type {
-    margin-bottom: 3rem;
   }
 </style>
 
 <main class="container">
-  <!-- cadastro -->
   <div class="section-card">
     <div class="section-header">
       <i class="bi bi-box-seam-fill"></i> Cadastro de Produto
@@ -99,7 +72,6 @@
     </form>
   </div>
 
-  <!-- listagem -->
   <div class="section-card">
     <div class="section-header">
       <i class="bi bi-search"></i> Buscar Produto Cadastrado
@@ -111,6 +83,7 @@
              const txt = r.cells[0].textContent.toLowerCase();
              r.style.display = txt.includes(this.value.toLowerCase()) ? '' : 'none';
            })">
+
     <div class="table-responsive">
       <table id="produtos" class="table table-sm table-hover table-striped">
         <thead class="table-light">
@@ -122,8 +95,8 @@
         <tbody>
           {% for id, nome in produtos %}
           <tr>
-            <td data-label="Produto">{{ nome }}</td>
-            <td data-label="Ações" class="text-center">
+            <td>{{ nome }}</td>
+            <td class="text-center">
               <button type="button"
                       class="btn btn-sm btn-outline-danger"
                       data-bs-toggle="modal"
@@ -146,7 +119,7 @@
   </div>
 </main>
 
-<!-- modal de confirmação -->
+<!-- Modal de confirmação -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -154,14 +127,17 @@
         <h5 class="modal-title">
           <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirmar remoção
         </h5>
-        <button type="button" class="btn-close btn-close-white"
-                data-bs-dismiss="modal" aria-label="Fechar"></button>
+        <button type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal"
+                aria-label="Fechar"></button>
       </div>
       <div class="modal-body">
         Tem certeza que deseja remover este produto?
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary"
+        <button type="button"
+                class="btn btn-outline-secondary"
                 data-bs-dismiss="modal">Cancelar</button>
         <form id="deleteForm" method="post">
           <button type="submit" class="btn btn-danger">
