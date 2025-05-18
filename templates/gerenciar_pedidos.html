@@ -1,151 +1,99 @@
 {% extends "base.html" %}
-{% block title %}Cadastro de Produtos – PEDIDO DE MATERIAIS{% endblock %}
-
-{% block header %}{% endblock %}
-
+{% block title %}Gerenciar Pedidos{% endblock %}
 {% block content %}
-<style>
-  /* 1) Garantir que o scroll seja apenas dentro de main */
-  html, body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-  }
-  main.container {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 120px); /* desconta header + footer */
-    overflow: auto;
-    padding: 1rem;
-  }
 
-  /* 2) Mesmos estilos do novo pedido */
-  .section-card {
-    background: var(--card);
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-  .section-header {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--primary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
+<div class="card p-4 shadow-sm mb-4">
+  <h5 class="text-primary mb-3 d-flex align-items-center">
+    <i class="bi bi-list-check me-2"></i> Lista de Pedidos
+  </h5>
 
-  /* inputs e botões compactos para mobile */
-  .form-control-sm { font-size: 0.9rem; padding: 0.5rem; }
-  .btn-sm { font-size: 0.9rem; padding: 0.45rem 0.75rem; }
-
-  /* tabela responsiva sem scroll vertical extra */
-  .table-responsive { overflow-x: auto; }
-  table { margin-bottom: 0; }
-
-  /* espaçamento do ultimo card para não colidir com footer */
-  .section-card:last-of-type { margin-bottom: 3rem; }
-</style>
-
-<main class="container">
-  <!-- card de cadastro -->
-  <div class="section-card">
-    <div class="section-header">
-      <i class="bi bi-box-seam-fill"></i> Cadastro de Produto
-    </div>
-    <form method="post" class="row g-3 align-items-end" onsubmit="return !!this.produto_nome.value.trim()">
-      <div class="col-12 col-md-10">
-        <label for="produto_nome" class="form-label">Nome do Produto</label>
-        <input type="text"
-               id="produto_nome"
-               name="produto_nome"
-               class="form-control form-control-sm"
-               placeholder="Informe o nome..."
-               required>
-      </div>
-      <div class="col-12 col-md-2 d-grid">
-        <button type="submit" class="btn btn-primary btn-sm">
-          <i class="bi bi-plus-lg me-1"></i> Adicionar
-        </button>
-      </div>
-    </form>
-  </div>
-
-  <!-- card de listagem -->
-  <div class="section-card">
-    <div class="section-header">
-      <i class="bi bi-search"></i> Buscar Produto Cadastrado
-    </div>
-    <input type="text"
-           class="form-control form-control-sm mb-3"
-           placeholder="Pesquisar por nome..."
-           oninput="document.querySelectorAll('#produtos tbody tr').forEach(r => {
-             const txt = r.cells[0].textContent.toLowerCase();
-             r.style.display = txt.includes(this.value.toLowerCase()) ? '' : 'none';
-           })">
-
-    <div class="table-responsive">
-      <table id="produtos" class="table table-sm table-hover table-striped">
-        <thead class="table-light">
-          <tr>
-            <th>Produto</th>
-            <th class="text-center">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for id, nome in produtos %}
-          <tr>
-            <td>{{ nome }}</td>
-            <td class="text-center">
-              <button type="button"
-                      class="btn btn-sm btn-outline-danger"
-                      data-bs-toggle="modal"
-                      data-bs-target="#confirmModal"
-                      onclick="document.getElementById('deleteForm').action='/remover_produto/{{ id }}'">
-                <i class="bi bi-trash"></i>
+  <div class="table-responsive">
+    <table class="table table-hover table-bordered align-middle text-center">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Usuário</th>
+          <th>Status</th>
+          <th>Data</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for id, usuario, status, data in pedidos %}
+        <tr>
+          <td>{{ id }}</td>
+          <td>{{ usuario }}</td>
+          <td>
+            <span class="badge {{ 'bg-success' if status == 'aberto' else 'bg-danger' }}">
+              {{ status }}
+            </span>
+          </td>
+          <td>{{ data }}</td>
+          <td>
+            <a class="btn btn-sm btn-outline-primary rounded-pill" href="{{ url_for('view_pedido', pedido_id=id) }}">
+              <i class="bi bi-eye"></i> Ver
+            </a>
+            {% if status == 'aberto' %}
+            <form id="close-form-{{ id }}" method="POST" action="{{ url_for('fechar_pedido', pedido_id=id) }}" style="display:inline;">
+              <button type="button" class="btn btn-sm btn-outline-success rounded-pill ms-1 close-order-btn" data-form-id="close-form-{{ id }}">
+                <i class="bi bi-lock"></i> Fechar
               </button>
-            </td>
-          </tr>
-          {% else %}
-          <tr>
-            <td colspan="2" class="text-center text-muted py-4">
-              Nenhum produto cadastrado.
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="text-center text-muted py-4">Nenhum pedido disponível.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-</main>
+</div>
 
-<!-- modal de confirmação -->
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+<!-- Modal de confirmação de fechamento -->
+<div class="modal fade" id="confirmCloseModal" tabindex="-1" aria-labelledby="confirmCloseModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i>
-          Confirmar remoção
-        </h5>
-        <button type="button" class="btn-close btn-close-white"
-                data-bs-dismiss="modal" aria-label="Fechar"></button>
+      <div class="modal-header bg-danger text-white align-items-center">
+        <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+        <h5 class="modal-title mb-0" id="confirmCloseModalLabel">Confirmar Fechamento</h5>
+        <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
       <div class="modal-body">
-        Tem certeza que deseja remover este produto?
+        Tem certeza que deseja fechar este pedido?
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary"
-                data-bs-dismiss="modal">Cancelar</button>
-        <form id="deleteForm" method="post">
-          <button type="submit" class="btn btn-danger">
-            <i class="bi bi-trash-fill me-1"></i> Remover
-          </button>
-        </form>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmCloseBtn">
+          <i class="bi bi-lock-fill me-1"></i> Fechar
+        </button>
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    let formToSubmit = null;
+    const confirmModalEl = document.getElementById('confirmCloseModal');
+    const confirmModal = new bootstrap.Modal(confirmModalEl);
+
+    document.querySelectorAll('.close-order-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        formToSubmit = document.getElementById(this.dataset.formId);
+        confirmModal.show();
+      });
+    });
+
+    document.getElementById('confirmCloseBtn').addEventListener('click', function() {
+      if (formToSubmit) {
+        formToSubmit.submit();
+      }
+    });
+  });
+</script>
 {% endblock %}
